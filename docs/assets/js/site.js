@@ -133,7 +133,7 @@ function SetEmptyTile(){
     let imgEle = document.getElementById("current-piece");
     let pieceNameSpan = document.getElementById("current-piece-description");   
     
-    imgEle.src = "./img/nick_cage.jpg";
+    imgEle.src = "./assets/img/nick_cage.jpg";
     pieceNameSpan.textContent = "No Piece Selected";
 }
 
