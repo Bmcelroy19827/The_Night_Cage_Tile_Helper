@@ -1,0 +1,8 @@
+.d-flex span{
+    margin: 1em;
+    padding: 1em;
+}
+#current-piece{
+    width: 900px;
+    height: 900px;
+}
