@@ -3,6 +3,30 @@
     padding: 1em;
 }
 #current-piece{
-    width: 900px;
-    height: 900px;
+    width: 300px;
+    height: 300px;
+}  
+@media screen and (min-width: 540px){
+    #current-piece{
+        width: 400px;
+        height: 400px;
+    }    
+}
+@media screen and (min-width: 567px){
+    #current-piece{
+        width: 500px;
+        height: 500px;
+    }    
+}
+@media screen and (min-width: 767px){
+    #current-piece{
+        width: 600px;
+        height: 600px;
+    }    
+}
+@media screen and (min-width: 992px){
+    #current-piece{
+        width: 900px;
+        height: 900px;
+    }    
 }
