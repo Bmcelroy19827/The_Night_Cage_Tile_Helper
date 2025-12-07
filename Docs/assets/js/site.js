@@ -180,35 +180,35 @@ function CreateAllGameTiles(){
 function GetStartingTiles(){
     let stack = []
     if(numberOfPlayers < 5){
-        stack = CreateTileReferences("T-Bend", "./img/T_Bend_aseprite.jpg", 4, stack);
-        stack = CreateTileReferences("Crossroads", "./img/Crossroads_aseprite.jpg", 2, stack);
-        stack = CreateTileReferences("Straight", "./img/Straight_cropped.jpg", 2, stack);
+        stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", 4, stack);
+        stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", 2, stack);
+        stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", 2, stack);
         ShuffleStack(stack);
         return stack
     }
 
-    stack = CreateTileReferences("T-Bend", "./img/T_Bend_aseprite.jpg", 4, stack);
-    stack = CreateTileReferences("Crossroads", "./img/Crossroads_aseprite.jpg", 2, stack);
-    stack = CreateTileReferences("Straight", "./img/Straight_cropped.jpg", 2, stack);
+    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", 4, stack);
+    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", 2, stack);
+    stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", 2, stack);
     return stack;
 }
 
 function GetRemainingTileStack(){
     let stack = [];
     if(isAdvancedMode){
-        stack = CreateTileReferences("PitFiend", "./img/Pitfiend_cropped.jpg", 2, stack);
-        stack = CreateTileReferences("Keeper", "./img/Keeper_cropped.jpg", 6, stack);   
-        stack = CreateTileReferences("Wax Eater", "./img/WaxEater_cropped.jpg", 2, stack, true); 
+        stack = CreateTileReferences("PitFiend", "./assets/img/Pitfiend_cropped.jpg", 2, stack);
+        stack = CreateTileReferences("Keeper", "./assets/img/Keeper_cropped.jpg", 6, stack);   
+        stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEater_cropped.jpg", 2, stack, true); 
     }
     else{
-        stack = CreateTileReferences("Wax Eater", "./img/WaxEater_cropped.jpg", 10, stack, true);
-        stack = CreateTileReferences("Key", "./img/Keys_cropped.jpg", 6, stack);
+        stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEater_cropped.jpg", 10, stack, true);
+        stack = CreateTileReferences("Key", "./assets/img/Keys_cropped.jpg", 6, stack);
     }
     
-    stack = CreateTileReferences("T-Bend", "./img/T_Bend_aseprite.jpg", 26, stack);
-    stack = CreateTileReferences("Crossroads", "./img/Crossroads_aseprite.jpg", 10, stack);
-    stack = CreateTileReferences("Straight", "./img/Straight_cropped.jpg", 8, stack);         
-    stack = CreateTileReferences("Gate", "./img/Gate_Cropped.jpg", 4, stack);
+    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", 26, stack);
+    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", 10, stack);
+    stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", 8, stack);         
+    stack = CreateTileReferences("Gate", "./assets/img/Gate_Cropped.jpg", 4, stack);
 
     return stack;
 }
