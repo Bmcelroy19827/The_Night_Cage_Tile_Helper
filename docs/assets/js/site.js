@@ -16,7 +16,10 @@ let playedTiles = [];
 let currentTile;
 let numberOfPlayers;
 let isAdvancedMode;
-console.log("Starting Site.js Updated");
+let soundCache = {};
+let isGameRunning = false;
+let emptyTileSoundFiles = ["laugh.mp3", "no.mp3", "no-no-no.mp3", "too-late.mp3", "wow.mp3"];
+
 SetInitialButtons();
 SetEmptyTile();
 
@@ -61,11 +64,15 @@ function StartGame(){
     }
 
     CreateAllGameTiles();
-
-    alert("Players will now take turns first each laying one start tile down, then player 1 will start by drawing two tiles to place for the first turn");
+    GetSound("put-the-bunny-back-in-the-box.mp3", false).play();
+    isGameRunning = true;
+    setTimeout( () => {
+        alert("Players will now take turns first each laying one start tile down, then player 1 will start by drawing two tiles to place for the first turn");
+    },500);
 }
 
 function EndGame(){
+    isGameRunning = false;
     gameTiles = [];
     discardedTiles = [];
     playedTiles = [];
@@ -73,10 +80,12 @@ function EndGame(){
     numberOfPlayers = null;
     isAdvancedMode = null;
 
+    GetSound("admiring_your_cage.mp3", false).play();
     SetEmptyTile();
-
     SetInitialButtons();
-    alert("All data reset. Choose your configuration and click 'Start Game' when ready to try again");
+    setTimeout(() => {
+        alert("All data reset. Choose your configuration and click 'Start Game' when ready to try again");
+    }, 500);   
 }
 
 function DrawTile(){
@@ -107,10 +116,14 @@ function DiscardTile(isAttackPossible){
             }
             console.log(`Attempt to discard a ${tileToDiscard.name}, but triggered attack`);
             currentTile = tileToDiscard
-            SetCurrentTile(currentTile);
-            alert(`You have discarded a ${currentTile.name} which attacks. Handle this action before continuing.`)
+            SetCurrentTile(currentTile, true);
+            setTimeout(() => 
+                {
+                    alert(`You have discarded a ${currentTile.name} which attacks. Handle this action before continuing.`)
+                }, 500);
             return;
         }
+        GetSound("discard.wav",false).play();
         console.log(`${tileToDiscard.name} discarded`);
         discardedTiles.unshift(tileToDiscard);
         return;
@@ -119,12 +132,13 @@ function DiscardTile(isAttackPossible){
     alert("You have ran of tiles to Discard => final flicker");
 }
 
-function SetCurrentTile(currentTile){
+function SetCurrentTile(currentTile, wasDiscardedAttack = false){
     let imgEle = document.getElementById("current-piece");
     let pieceNameSpan = document.getElementById("current-piece-description");
 
     imgEle.src = currentTile.src;
     pieceNameSpan.textContent = currentTile.name;
+    GetSound(currentTile.wav, wasDiscardedAttack).play();
     document.getElementById("mark-placed-btn").removeAttribute("disabled");
 }
 
@@ -135,6 +149,19 @@ function SetEmptyTile(){
     
     imgEle.src = "./assets/img/nick_cage.jpg";
     pieceNameSpan.textContent = "No Piece Selected";
+    PlayEmptyTileSound();
+}
+
+function PlayEmptyTileSound(){
+    if(isGameRunning == true){
+        let soundFileLength = emptyTileSoundFiles.length;
+        let randomIndex = Math.floor(Math.random() * soundFileLength);
+        if (randomIndex == soundFileLength){
+            randomIndex--;
+        }
+
+        GetSound(emptyTileSoundFiles[randomIndex], false).play();
+    }
 }
 
 function HandleKeeperRangeAttack(){
@@ -180,35 +207,35 @@ function CreateAllGameTiles(){
 function GetStartingTiles(){
     let stack = []
     if(numberOfPlayers < 5){
-        stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", 4, stack);
-        stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", 2, stack);
-        stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", 2, stack);
+        stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", "safe_tile_draw.wav", 4, stack);
+        stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", "safe_tile_draw.wav", 2, stack);
+        stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", "crumble_tile.wav", 2, stack);
         ShuffleStack(stack);
         return stack
     }
 
-    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", 4, stack);
-    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", 2, stack);
-    stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", 2, stack);
+    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", "safe_tile_draw.wav", 4, stack);
+    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", "safe_tile_draw.wav", 2, stack);
+    stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", "crumble_tile.wav", 2, stack);
     return stack;
 }
 
 function GetRemainingTileStack(){
     let stack = [];
     if(isAdvancedMode){
-        stack = CreateTileReferences("PitFiend", "./assets/img/Pitfiend_cropped.jpg", 2, stack);
-        stack = CreateTileReferences("Keeper", "./assets/img/Keeper_cropped.jpg", 6, stack);   
-        stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEater_cropped.jpg", 2, stack, true); 
+        stack = CreateTileReferences("PitFiend", "./assets/img/Pitfiend_cropped.jpg", "pit_fiend.wav", 2, stack);
+        stack = CreateTileReferences("Keeper", "./assets/img/Keeper_cropped.jpg", "keeper.wav", 6, stack);   
+        stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEater_cropped.jpg", "wax_eater.wav", 2, stack, true); 
     }
     else{
-        stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEater_cropped.jpg", 10, stack, true);
-        stack = CreateTileReferences("Key", "./assets/img/Keys_cropped.jpg", 6, stack);
+        stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEater_cropped.jpg", "wax_eater.wav", 10, stack, true);
+        stack = CreateTileReferences("Key", "./assets/img/Keys_cropped.jpg", "key.wav", 6, stack);
     }
     
-    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", 26, stack);
-    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", 10, stack);
-    stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", 8, stack);         
-    stack = CreateTileReferences("Gate", "./assets/img/Gate_Cropped.jpg", 4, stack);
+    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", "safe_tile_draw.wav", 26, stack);
+    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", "safe_tile_draw.wav", 10, stack);
+    stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", "crumble_tile.wav", 8, stack);         
+    stack = CreateTileReferences("Gate", "./assets/img/Gate_Cropped.jpg", "gate.wav", 4, stack);
 
     return stack;
 }
@@ -242,21 +269,48 @@ function ShuffleStack(stack){
     return stack;
 }
 
-function CreateTileReferences(name, src, count, stack, doesAttackIfDiscarded = false){
+function CreateTileReferences(
+    name, 
+    src, 
+    wav,
+    count, 
+    stack, 
+    doesAttackIfDiscarded = false
+)
+    {
     iterator = 1;
     while (iterator <= count){
-        let tile = CreateTileReference(iterator, name, src, doesAttackIfDiscarded);
+        let tile = CreateTileReference(iterator, name, src, wav, doesAttackIfDiscarded);
         stack.push(tile);
         iterator++;
     }
     return stack;
 }
 
-function CreateTileReference(id, name, src, doesAttackIfDiscarded){
+function CreateTileReference(id, name, src, wav, doesAttackIfDiscarded){
     return {
         "id": `${name}-${id}`,
         "name": name,
         "src": src,
-        "doesAttackOnDiscard": doesAttackIfDiscarded
+        "doesAttackOnDiscard": doesAttackIfDiscarded,
+        "wav": wav
     }
+}
+
+function GetSound(wavName, wasDiscardedAttack){
+    let wavSplit = wavName.split('.');
+    let name = wavSplit[0];
+    if(wasDiscardedAttack == true){
+        if(soundCache[`${name}-Attack`]){
+            return soundCache[`${name}-Attack`];
+        }
+        let newWavName = `${name}_attack.${wavSplit[1]}`
+        soundCache[`${name}-Attack`] = new Audio(`./assets/wav/${newWavName}`);
+        return soundCache[`${name}-Attack`]
+    }
+    if(soundCache[name]){
+        return soundCache[name];
+    }
+    soundCache[name] = new Audio(`./assets/wav/${wavName}`);
+    return soundCache[name];
 }
