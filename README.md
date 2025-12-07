@@ -41,6 +41,7 @@ Current Features:
   - When a monster is discarded that does not attack (death rattle?)
   - When the game enters the "final flicker" stage
   - Loopable track(s) for ambience (maybe different levels of intensity)
+- Add some animations or color shifts to the buttons for a little more response for the user. 
 
 ### Future Features
 
