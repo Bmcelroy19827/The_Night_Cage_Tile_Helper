@@ -2,6 +2,8 @@
 
 A GitHub Pages static site to handle tile setup and drawing during gameplay so the players do not need to worry so much about that part.
 
+Site with official rules for the board game: https://rules.dized.com/game/q9XiaNOwTECchKRb8oszag/U347pAr8SEmBOHBRlqNRQQ/overview
+
 Current Features:
 
 - Radios for choosing player count (only really setup for 1-4)
