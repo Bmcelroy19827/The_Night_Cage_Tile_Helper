@@ -235,7 +235,7 @@ function GetRemainingTileStack(){
     stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 26, stack);
     stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 10, stack);
     stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 8, stack);         
-    stack = CreateTileReferences("Gate", "./assets/img/GateTile_Cropped.png", "gate.wav", 4, stack);
+    stack = CreateTileReferences("Gate", "./assets/img/GateTile_cropped.png", "gate.wav", 4, stack);
 
     return stack;
 }
