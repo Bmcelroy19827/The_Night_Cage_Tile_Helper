@@ -207,16 +207,16 @@ function CreateAllGameTiles(){
 function GetStartingTiles(){
     let stack = []
     if(numberOfPlayers < 5){
-        stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", "safe_tile_draw.wav", 4, stack);
-        stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", "safe_tile_draw.wav", 2, stack);
-        stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", "crumble_tile.wav", 2, stack);
+        stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_cropped.jpg", "safe_tile_draw.wav", 4, stack);
+        stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_cropped.jpg", "safe_tile_draw.wav", 2, stack);
+        stack = CreateTileReferences("Straight", "./assets/img/Straight2_cropped.jpg", "crumble_tile.wav", 2, stack);
         ShuffleStack(stack);
         return stack
     }
 
-    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", "safe_tile_draw.wav", 4, stack);
-    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", "safe_tile_draw.wav", 2, stack);
-    stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", "crumble_tile.wav", 2, stack);
+    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_cropped.jpg", "safe_tile_draw.wav", 4, stack);
+    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_cropped.jpg", "safe_tile_draw.wav", 2, stack);
+    stack = CreateTileReferences("Straight", "./assets/img/Straight2_cropped.jpg", "crumble_tile.wav", 2, stack);
     return stack;
 }
 
@@ -232,9 +232,9 @@ function GetRemainingTileStack(){
         stack = CreateTileReferences("Key", "./assets/img/Keys_cropped.jpg", "key.wav", 6, stack);
     }
     
-    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_aseprite.jpg", "safe_tile_draw.wav", 26, stack);
-    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_aseprite.jpg", "safe_tile_draw.wav", 10, stack);
-    stack = CreateTileReferences("Straight", "./assets/img/Straight_cropped.jpg", "crumble_tile.wav", 8, stack);         
+    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend_cropped.jpg", "safe_tile_draw.wav", 26, stack);
+    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads_cropped.jpg", "safe_tile_draw.wav", 10, stack);
+    stack = CreateTileReferences("Straight", "./assets/img/Straight2_cropped.jpg", "crumble_tile.wav", 8, stack);         
     stack = CreateTileReferences("Gate", "./assets/img/Gate_Cropped.jpg", "gate.wav", 4, stack);
 
     return stack;
