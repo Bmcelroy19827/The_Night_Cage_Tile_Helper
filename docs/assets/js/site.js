@@ -129,7 +129,7 @@ function DiscardTile(isAttackPossible){
         discardedTiles.unshift(tileToDiscard);
         return;
     }
-    HandleOutOfTiles();
+    HandleOutOfTiles();//wilsonwashere
     alert("You have ran of tiles to Discard => final flicker");
 }
 
