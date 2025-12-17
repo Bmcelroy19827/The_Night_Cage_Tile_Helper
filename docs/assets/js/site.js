@@ -41,6 +41,7 @@ function SetInitialButtons(){
 }
 
 function StartGame(){
+    StartGameLoopMusic();
     document.getElementById("create-game-btn").setAttribute("disabled", true);
     document.getElementById("end-game-btn").removeAttribute("disabled");
     document.getElementById("draw-btn").removeAttribute("disabled");
@@ -313,4 +314,9 @@ function GetSound(wavName, wasDiscardedAttack){
     }
     soundCache[name] = new Audio(`./assets/wav/${wavName}`);
     return soundCache[name];
+}
+
+function StartGameLoopMusic(){
+    let player = document.getElementById("game-music-player");
+    player.play();
 }
