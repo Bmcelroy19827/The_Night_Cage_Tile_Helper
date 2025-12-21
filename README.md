@@ -6,10 +6,11 @@ Site with official rules for the board game: https://rules.dized.com/game/q9XiaN
 
 Current Features:
 
-- Radios for choosing player count (only really setup for 1-4)
+- Radios for choosing player count
   - 1-4 players
-  - 5 players (not implemented)
-- Checkbox for advanced mode (will replace all but two wax eaters with keepers and pit fiends)
+  - 5 players 
+- Checkbox for advanced mode 
+  - removes 8 wax eaters, adds 2 pit fiends and 6 or 7 keepers (depending on player count)
 - buttons
   - Start Game
   - End Game
@@ -33,16 +34,19 @@ Current Features:
   - Discard tile without attack
   - Attack from Wax Eater when discarded through "Discard" button (stay action)
   - Marking the current piece as placed via "Tile Placed" button
+  - Ambient sound added which is looped during gameplay and can be stopped at any time
+- Played Stack added to show tiles believed to be on the gameboard
+- Discarded Stack added to show tiles believed to be discarded
   
 
 ## Todos
 
+- Ability to click item on "Played" stack, moving it to the "Discard" stack
 - Add the following sounds
   - When a key is discarded
   - When a gate is discarded
-  - When a monster is discarded that does not attack (death rattle?)
+  - Add attack sounds for other monsters when discarded via stay action
   - When the game enters the "final flicker" stage
-  - Loopable track(s) for ambience (maybe different levels of intensity)
 - Add some animations or color shifts to the buttons for a little more response for the user. 
 
 ### Future Features

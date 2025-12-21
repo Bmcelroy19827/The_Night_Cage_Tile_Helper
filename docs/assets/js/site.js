@@ -92,11 +92,12 @@ function EndGame(){
 function DrawTile(){
     if(gameTiles.length > 0){
         if(currentTile){
-            playedTiles.unshift(currentTile);
+            AddTileToPlayedStack(currentTile);
+            currentTile = null;
         }
-        currentTile = gameTiles.shift();
-        console.log(`Drew ${currentTile.name}`);
-        SetCurrentTile(currentTile);
+        let newTile = gameTiles.shift();
+        console.log(`Drew ${newTile.name}`);
+        SetCurrentTile(newTile);
         return;
     }
     HandleOutOfTiles();
@@ -113,27 +114,31 @@ function DiscardTile(isAttackPossible){
         
         if(isAttackPossible == true && tileToDiscard.doesAttackOnDiscard == true){
             if(currentTile){
-                playedTiles.unshift(currentTile);
+                AddTileToPlayedStack(currentTile);
             }
             console.log(`Attempt to discard a ${tileToDiscard.name}, but triggered attack`);
-            currentTile = tileToDiscard
-            SetCurrentTile(currentTile, true);
+            tileToDiscard
+            SetCurrentTile(tileToDiscard, true);
             setTimeout(() => 
                 {
-                    alert(`You have discarded a ${currentTile.name} which attacks. Handle this action before continuing.`)
+                    alert(`You have discarded a ${tileToDiscard.name} which attacks. Handle this action before continuing.`)
                 }, 500);
             return;
         }
         GetSound("discard.wav",false).play();
-        console.log(`${tileToDiscard.name} discarded`);
-        discardedTiles.unshift(tileToDiscard);
+        AddTileToDiscardedStack(tileToDiscard);
         return;
     }
     HandleOutOfTiles();//wilsonwashere
     alert("You have ran of tiles to Discard => final flicker");
 }
 
-function SetCurrentTile(currentTile, wasDiscardedAttack = false){
+function SetCurrentTile(newTile, wasDiscardedAttack = false){
+    if(currentTile){
+        AddTileToPlayedStack(currentTile);
+    }
+    
+    currentTile = newTile;
     let imgEle = document.getElementById("current-piece");
     let pieceNameSpan = document.getElementById("current-piece-description");
 
@@ -144,12 +149,13 @@ function SetCurrentTile(currentTile, wasDiscardedAttack = false){
 }
 
 function SetEmptyTile(){
+    currentTile = null;
     document.getElementById("mark-placed-btn").setAttribute("disabled", true);
     let imgEle = document.getElementById("current-piece");
     let pieceNameSpan = document.getElementById("current-piece-description");   
     
     imgEle.src = "./assets/img/nick_cage.jpg";
-    pieceNameSpan.textContent = "No Piece Selected";
+    pieceNameSpan.textContent = "Nick";
     PlayEmptyTileSound();
 }
 
@@ -185,9 +191,30 @@ function HandleWaxEaterAttack(){
 }
 
 function HandleTilePlaced(){
-    console.log(`Moving ${currentTile.name} to played tiles stack`)
-    playedTiles.unshift(currentTile);
+    AddTileToPlayedStack(currentTile);  
     SetEmptyTile();
+}
+
+function AddTileToPlayedStack(tile){
+    playedTiles.unshift(currentTile);
+    let playedDiv = document.getElementById("played-div");
+    let newImage = document.createElement("img");
+    newImage.src = tile.src;
+    newImage.classList.add("img-fluid","pb-1");
+    playedDiv.appendChild(newImage); 
+    setTimeout(() => newImage.scrollIntoView(), 100);
+    console.log(`${currentTile.name} played`);
+}
+
+function AddTileToDiscardedStack(tile){
+    discardedTiles.unshift(tile);  
+    let discardedDiv = document.getElementById("discarded-div");
+    let newImage = document.createElement("img");
+    newImage.src = tile.src;
+    newImage.classList.add("img-fluid", "pb-1");
+    discardedDiv.appendChild(newImage);
+    setTimeout(() => newImage.scrollIntoView(), 100);
+    console.log(`${tile.name} discarded`);
 }
 
 function CreateAllGameTiles(){
@@ -215,26 +242,45 @@ function GetStartingTiles(){
         return stack
     }
 
-    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 4, stack);
-    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 2, stack);
+    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 5, stack);
+    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 3, stack);
     stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 2, stack);
     return stack;
 }
 
 function GetRemainingTileStack(){
     let stack = [];
+    
+    if(numberOfPlayers < 5){
+        if(isAdvancedMode){
+            stack = CreateTileReferences("PitFiend", "./assets/img/Pitfiend2_cropped.png", "pit_fiend.wav", 2, stack);
+            stack = CreateTileReferences("Keeper", "./assets/img/Keeper2_cropped.png", "keeper.wav", 6, stack);   
+            stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 4, stack, true); 
+        }
+        else{
+            stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 12, stack, true);
+            stack = CreateTileReferences("Key", "./assets/img/KeyTile_cropped.png", "key.wav", 6, stack);
+        }
+        stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 26, stack);
+        stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 10, stack);
+        stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 8, stack);         
+        stack = CreateTileReferences("Gate", "./assets/img/GateTile_cropped.png", "gate.wav", 4, stack);
+    
+        return stack;
+    }
+
     if(isAdvancedMode){
         stack = CreateTileReferences("PitFiend", "./assets/img/Pitfiend2_cropped.png", "pit_fiend.wav", 2, stack);
-        stack = CreateTileReferences("Keeper", "./assets/img/Keeper2_cropped.png", "keeper.wav", 6, stack);   
+        stack = CreateTileReferences("Keeper", "./assets/img/Keeper2_cropped.png", "keeper.wav", 7, stack);   
         stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 2, stack, true); 
     }
     else{
         stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 10, stack, true);
-        stack = CreateTileReferences("Key", "./assets/img/KeyTile_cropped.png", "key.wav", 6, stack);
-    }
-    
-    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 26, stack);
-    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 10, stack);
+        stack = CreateTileReferences("Key", "./assets/img/KeyTile_cropped.png", "key.wav", 7, stack);
+    }    
+
+    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 25, stack);
+    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 9, stack);
     stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 8, stack);         
     stack = CreateTileReferences("Gate", "./assets/img/GateTile_cropped.png", "gate.wav", 4, stack);
 

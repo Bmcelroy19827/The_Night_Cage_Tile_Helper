@@ -25,7 +25,7 @@
                     <input type="radio" name="player-count" value="4" checked/> 1-4
                 </span>
                 <span>
-                    <input type="radio" name="player-count" value="5"/> 5
+                    <input type="radio" name="player-count" value="5" class="ms-1"/> 5
                 </span>
             </div>
         </div>
@@ -56,10 +56,24 @@
         <audio id="game-music-player" src="./assets/wav/PlayOnLoop-horror-ambience-3-short.wav" controls="controls" loop="loop"></audio>
     </div>
     <div class="container" aria-roledescription="Container to hold Tile Image">
-        <h1 class="text-danger">Current piece: <span id="current-piece-description">Keeper</span></h1>
-        <img class="" id="current-piece" src=""/>
+        <div class="d-flex flex-row">
+            <div>
+                <span class="text-danger h2" id="current-piece-description">Nick</span>
+                <img class="" id="current-piece" src=""/>
+            </div>
+            <div>
+                <span class="text-danger ps-3 h2">Played</span>
+                <div id="played-div" class="d-flex flex-column-reverse ps-3 overflow-y-scroll">                          
+                </div>
+            </div>            
+            <div>
+                <span class="text-danger ps-3 h2">Discard</span>
+                <div id="discarded-div" class="d-flex flex-column-reverse ps-3 overflow-y-scroll">                          
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="container pt-5" aria-roledescription="Container for gameplay buttons">
+    <div class="container pt-3" aria-roledescription="Container for gameplay buttons">
         <button 
             class="btn-outline-danger m-1" 
             id="draw-btn"
