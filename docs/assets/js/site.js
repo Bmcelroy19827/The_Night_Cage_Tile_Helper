@@ -81,6 +81,11 @@ function EndGame(){
     numberOfPlayers = null;
     isAdvancedMode = null;
 
+    let discardedDiv = document.getElementById("discarded-div");
+    discardedDiv.textContent = '';
+    let playedDiv = document.getElementById("played-div");
+    playedDiv.textContent = '';
+
     GetSound("admiring_your_cage.mp3", false).play();
     SetEmptyTile();
     SetInitialButtons();
@@ -112,7 +117,7 @@ function DiscardTile(isAttackPossible){
     if(gameTiles.length > 0){
         let tileToDiscard = gameTiles.shift();
         
-        if(isAttackPossible == true && tileToDiscard.doesAttackOnDiscard == true){
+        if(isAttackPossible == true && tileToDiscard.isMonster == true){
             if(currentTile){
                 AddTileToPlayedStack(currentTile);
             }
@@ -195,12 +200,33 @@ function HandleTilePlaced(){
     SetEmptyTile();
 }
 
+function HandlePlayedOnClick(e){
+    let img = e.srcElement;
+    let tileId = img.dataset.tileId;
+    let foundTile = playedTiles.find(t => t.id == tileId);
+
+    if(confirm(`Move ${foundTile.name} to the discard pile?`)){
+        let playedDiv = document.getElementById("played-div");
+        playedDiv.removeChild(img);
+        img.removeEventListener("click", HandlePlayedOnClick);
+        let discardedDiv = document.getElementById("discarded-div");
+        discardedDiv.appendChild(img);
+    
+        let foundIndex = playedTiles.findIndex(t => t.id == tileId);
+        playedTiles.splice(foundIndex, 1);
+        discardedTiles.unshift(foundTile);
+        setTimeout(() => img.scrollIntoView(), 100);
+    }
+}
+
 function AddTileToPlayedStack(tile){
     playedTiles.unshift(currentTile);
     let playedDiv = document.getElementById("played-div");
     let newImage = document.createElement("img");
     newImage.src = tile.src;
     newImage.classList.add("img-fluid","pb-1");
+    newImage.setAttribute("data-tile-id", tile.id);
+    newImage.addEventListener("click", HandlePlayedOnClick);
     playedDiv.appendChild(newImage); 
     setTimeout(() => newImage.scrollIntoView(), 100);
     console.log(`${currentTile.name} played`);
@@ -212,6 +238,7 @@ function AddTileToDiscardedStack(tile){
     let newImage = document.createElement("img");
     newImage.src = tile.src;
     newImage.classList.add("img-fluid", "pb-1");
+    newImage.setAttribute("data-tile-id", tile.id);
     discardedDiv.appendChild(newImage);
     setTimeout(() => newImage.scrollIntoView(), 100);
     console.log(`${tile.name} discarded`);
@@ -223,7 +250,7 @@ function CreateAllGameTiles(){
     console.log("Top Stack Created", topStack);
     topStack = ShuffleStack(topStack);
     console.log("Top Stack Shuffled", topStack);
-    let bottomStack = GetRemainingTileStack(numberOfPlayers, isAdvancedMode);
+    let bottomStack = GetRemainingTileStack(topStack);
     console.log("Bottom Stack Created", bottomStack);
     bottomStack = ShuffleStack(bottomStack);
     console.log("Bottom Stack Shuffled", bottomStack);
@@ -238,52 +265,57 @@ function GetStartingTiles(){
         stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 4, stack);
         stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 2, stack);
         stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 2, stack);
-        ShuffleStack(stack);
+
+        stack.forEach(tile => console.log(tile.id));
         return stack
     }
 
     stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 5, stack);
     stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 3, stack);
     stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 2, stack);
+    
+    stack.forEach(tile => console.log(tile.id));
     return stack;
 }
 
-function GetRemainingTileStack(){
+function GetRemainingTileStack(previousStack){
     let stack = [];
     
     if(numberOfPlayers < 5){
         if(isAdvancedMode){
-            stack = CreateTileReferences("PitFiend", "./assets/img/Pitfiend2_cropped.png", "pit_fiend.wav", 2, stack);
-            stack = CreateTileReferences("Keeper", "./assets/img/Keeper2_cropped.png", "keeper.wav", 6, stack);   
-            stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 4, stack, true); 
+            stack = CreateTileReferences("PitFiend", "./assets/img/Pitfiend2_cropped.png", "pit_fiend.wav", 2, stack, previousStack);
+            stack = CreateTileReferences("Keeper", "./assets/img/Keeper2_cropped.png", "keeper.wav", 6, stack, previousStack);   
+            stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 4, stack, previousStack, true); 
         }
         else{
-            stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 12, stack, true);
-            stack = CreateTileReferences("Key", "./assets/img/KeyTile_cropped.png", "key.wav", 6, stack);
+            stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 12, stack, previousStack, true);
+            stack = CreateTileReferences("Key", "./assets/img/KeyTile_cropped.png", "key.wav", 6, stack, previousStack);
         }
-        stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 26, stack);
-        stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 10, stack);
-        stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 8, stack);         
-        stack = CreateTileReferences("Gate", "./assets/img/GateTile_cropped.png", "gate.wav", 4, stack);
+        stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 26, stack, previousStack);
+        stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 10, stack, previousStack);
+        stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 8, stack, previousStack);         
+        stack = CreateTileReferences("Gate", "./assets/img/GateTile_cropped.png", "gate.wav", 4, stack, previousStack);
     
+        stack.forEach(tile => console.log(tile.id));
         return stack;
     }
 
     if(isAdvancedMode){
-        stack = CreateTileReferences("PitFiend", "./assets/img/Pitfiend2_cropped.png", "pit_fiend.wav", 2, stack);
-        stack = CreateTileReferences("Keeper", "./assets/img/Keeper2_cropped.png", "keeper.wav", 7, stack);   
-        stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 2, stack, true); 
+        stack = CreateTileReferences("PitFiend", "./assets/img/Pitfiend2_cropped.png", "pit_fiend.wav", 2, stack, previousStack);
+        stack = CreateTileReferences("Keeper", "./assets/img/Keeper2_cropped.png", "keeper.wav", 7, stack, previousStack);   
+        stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 2, stack, previousStack, true); 
     }
     else{
-        stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 10, stack, true);
-        stack = CreateTileReferences("Key", "./assets/img/KeyTile_cropped.png", "key.wav", 7, stack);
+        stack = CreateTileReferences("Wax Eater", "./assets/img/WaxEaterTile_cropped.png", "wax_eater.wav", 10, stack, previousStack, true);
+        stack = CreateTileReferences("Key", "./assets/img/KeyTile_cropped.png", "key.wav", 7, stack, previousStack);
     }    
 
-    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 25, stack);
-    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 9, stack);
-    stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 8, stack);         
-    stack = CreateTileReferences("Gate", "./assets/img/GateTile_cropped.png", "gate.wav", 4, stack);
-
+    stack = CreateTileReferences("T-Bend", "./assets/img/T_Bend2_cropped.png", "safe_tile_draw.wav", 25, stack, previousStack);
+    stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 9, stack, previousStack);
+    stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 8, stack, previousStack);         
+    stack = CreateTileReferences("Gate", "./assets/img/GateTile_cropped.png", "gate.wav", 4, stack, previousStack);
+    
+    stack.forEach(tile => console.log(tile.id));
     return stack;
 }
 
@@ -322,24 +354,25 @@ function CreateTileReferences(
     wav,
     count, 
     stack, 
-    doesAttackIfDiscarded = false
+    previousStack = [],
+    isMonster = false
 )
     {
     iterator = 1;
     while (iterator <= count){
-        let tile = CreateTileReference(iterator, name, src, wav, doesAttackIfDiscarded);
+        let tile = CreateTileReference((1 + previousStack.length + stack.length), name, src, wav, isMonster);
         stack.push(tile);
         iterator++;
     }
     return stack;
 }
 
-function CreateTileReference(id, name, src, wav, doesAttackIfDiscarded){
+function CreateTileReference(id, name, src, wav, isMonster){
     return {
         "id": `${name}-${id}`,
         "name": name,
         "src": src,
-        "doesAttackOnDiscard": doesAttackIfDiscarded,
+        "isMonster": isMonster,
         "wav": wav
     }
 }

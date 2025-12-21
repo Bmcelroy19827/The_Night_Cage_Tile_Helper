@@ -35,9 +35,9 @@ Current Features:
   - Attack from Wax Eater when discarded through "Discard" button (stay action)
   - Marking the current piece as placed via "Tile Placed" button
   - Ambient sound added which is looped during gameplay and can be stopped at any time
-- Played Stack added to show tiles believed to be on the gameboard
-- Discarded Stack added to show tiles believed to be discarded
-  
+- Played Stack:  shows tiles believed to be on the gameboard
+- Discarded Stack: shows tiles believed to be discarded
+- Clicking on image in played stack will move it to the discard pile if confirmed
 
 ## Todos
 
