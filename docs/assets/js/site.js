@@ -10,19 +10,66 @@
 // 2 Omens (BOSS)
 // 2 Pathless (BOSS)
 
+/**
+ * @typedef GameTile
+ * @prop {string} id 
+ * @prop {string} name
+ * @prop {string} src
+ * @prop {boolean} isMonster
+ * @prop {string} wav
+ */
+
+/**
+ * @type {Array<GameTile>}
+ */
 let gameTiles = [];
+
+/**
+ * @type {Array<GameTile>}
+ */
 let discardedTiles = [];
+
+/**
+ * @type {Array<GameTile>}
+ */
 let playedTiles = [];
+
+/**
+ * @type {GameTile}
+ */
 let currentTile;
+
+/**
+ * @type {number}
+ */
 let numberOfPlayers;
+
+/**
+ * @type {boolean}
+ */
 let isAdvancedMode;
+
+/**
+ * @type {Record<string,Audio>}
+ */
 let soundCache = {};
+
+/**
+ * @type {boolean}
+ */
 let isGameRunning = false;
+
+/**
+ * @type {Array<string>}
+ */
 let emptyTileSoundFiles = ["laugh.mp3", "no.mp3", "no-no-no.mp3", "too-late.mp3", "wow.mp3"];
 
 SetInitialButtons();
 SetEmptyTile();
 
+/**
+ * Disables all buttons except "Start Game" - advanced monster buttons also hidden
+ */
 function SetInitialButtons(){
     document.getElementById("create-game-btn").removeAttribute("disabled");
     document.getElementById("end-game-btn").setAttribute("disabled", true);
@@ -40,6 +87,9 @@ function SetInitialButtons(){
     meleeKeeperBtn.setAttribute("disabled", true); 
 }
 
+/**
+ * Starts music, sets up game tiles based on user selections, enables necessary buttons for gameplay
+ */
 function StartGame(){
     StartGameLoopMusic();
     document.getElementById("create-game-btn").setAttribute("disabled", true);
@@ -51,7 +101,7 @@ function StartGame(){
     
     numberOfPlayers = document.querySelector("input[name='player-count']:checked").value
     isAdvancedMode = document.getElementById("use-keeper-and-pitfiend-cbx").checked;
-    console.log(`Buttons should be enabled now and game configured for ${numberOfPlayers} players and advanced Mode: ${isAdvancedMode}`);
+    //console.log(`Buttons should be enabled now and game configured for ${numberOfPlayers} players and advanced Mode: ${isAdvancedMode}`);
     
     if(isAdvancedMode == true){
         console.log("Showing and Enabling Keeper buttons since advance mode was checked");
@@ -72,6 +122,9 @@ function StartGame(){
     },500);
 }
 
+/**
+ * Resets all variables and form controls to initial state so a new game can be started
+ */
 function EndGame(){
     isGameRunning = false;
     gameTiles = [];
@@ -94,6 +147,11 @@ function EndGame(){
     }, 500);   
 }
 
+/**
+ * Draws tile and sets to current tile if tiles remain in the game stack
+ * Calls 'HandleOutOftiles' otherwise
+ * @returns {void}
+ */
 function DrawTile(){
     if(gameTiles.length > 0){
         if(currentTile){
@@ -109,10 +167,19 @@ function DrawTile(){
     alert("You have ran out of tiles to Draw => final flicker");
 }
 
+/**
+ * For the Discard button event listener
+ */
 function HandleDiscardTile(){
     DiscardTile(true);
 }
 
+/**
+ * Moves Tile to discard pile as long as it doesn't result in a surprise attack
+ * Calls 'SetCurrentTile' if surprise attack
+ * @param {boolean} isAttackPossible Whether the discarded card can result in a surprise attack
+ * @returns {void}
+ */
 function DiscardTile(isAttackPossible){
     if(gameTiles.length > 0){
         let tileToDiscard = gameTiles.shift();
@@ -134,10 +201,16 @@ function DiscardTile(isAttackPossible){
         AddTileToDiscardedStack(tileToDiscard);
         return;
     }
-    HandleOutOfTiles();//wilsonwashere
+    HandleOutOfTiles();
     alert("You have ran of tiles to Discard => final flicker");
 }
 
+/**
+ * Sets the image for the current tile along, calls functions to move previuos file if necessary
+ * and plays proper sound
+ * @param {GameTile} newTile The new tile to display as current
+ * @param {boolean} wasDiscardedAttack Was this tile a surprise attack
+ */
 function SetCurrentTile(newTile, wasDiscardedAttack = false){
     if(currentTile){
         AddTileToPlayedStack(currentTile);
@@ -153,6 +226,9 @@ function SetCurrentTile(newTile, wasDiscardedAttack = false){
     document.getElementById("mark-placed-btn").removeAttribute("disabled");
 }
 
+/**
+ * Puts the default image when no tile selected and calls 'PlayEmptyTileSound'
+ */
 function SetEmptyTile(){
     currentTile = null;
     document.getElementById("mark-placed-btn").setAttribute("disabled", true);
@@ -164,6 +240,9 @@ function SetEmptyTile(){
     PlayEmptyTileSound();
 }
 
+/**
+ * Plays a random sound from the declared list of file names
+ */
 function PlayEmptyTileSound(){
     if(isGameRunning == true){
         let soundFileLength = emptyTileSoundFiles.length;
@@ -176,11 +255,17 @@ function PlayEmptyTileSound(){
     }
 }
 
+/**
+ * Discards one tile from attack which will not trigger a surprise attack
+ */
 function HandleKeeperRangeAttack(){
     console.log("Discarding tile for keeper ranged attack");
     DiscardTile(false);
 }
 
+/**
+ * Discards three tiles from attack which do not trigger surprise attacks
+ */
 function HandleKeeperMeleeAttack(){
     console.log("Discarding three tiles for keeper melee attack");
     for(i = 0; i < 3; i++){
@@ -188,6 +273,9 @@ function HandleKeeperMeleeAttack(){
     }
 }
 
+/**
+ * Discards 3 tiles from attack which do not trigger surprise attacks
+ */
 function HandleWaxEaterAttack(){
     console.log("Discarding 3 tiles for Wax Eater Attack");
     for(i = 0; i < 3; i++){
@@ -195,13 +283,20 @@ function HandleWaxEaterAttack(){
     }
 }
 
+/**
+ * Moves tile to played stack and sets current piece to empty
+ */
 function HandleTilePlaced(){
     AddTileToPlayedStack(currentTile);  
     SetEmptyTile();
 }
 
+/**
+ * Allows player to click on an image in the played stack to move it to the discard stack
+ * @param {Event} e 
+ */
 function HandlePlayedOnClick(e){
-    let img = e.srcElement;
+    let img = e.target;
     let tileId = img.dataset.tileId;
     let foundTile = playedTiles.find(t => t.id == tileId);
 
@@ -219,6 +314,10 @@ function HandlePlayedOnClick(e){
     }
 }
 
+/**
+ * Moves tile to the played stack
+ * @param {GameTile} tile piece to be moved
+ */
 function AddTileToPlayedStack(tile){
     playedTiles.unshift(currentTile);
     let playedDiv = document.getElementById("played-div");
@@ -232,6 +331,10 @@ function AddTileToPlayedStack(tile){
     console.log(`${currentTile.name} played`);
 }
 
+/**
+ * Moves tile to the discard stack
+ * @param {GameTile} tile piece to be moved
+ */
 function AddTileToDiscardedStack(tile){
     discardedTiles.unshift(tile);  
     let discardedDiv = document.getElementById("discarded-div");
@@ -244,21 +347,25 @@ function AddTileToDiscardedStack(tile){
     console.log(`${tile.name} discarded`);
 }
 
+/**
+ * Creates all game tiles and pushes them to the gameTiles variable. 
+ */
 function CreateAllGameTiles(){
-    console.log("Starting 'CreateAllGameTile()", {numberOfPlayers, isAdvancedMode});
-    let topStack = GetStartingTiles(numberOfPlayers);
-    console.log("Top Stack Created", topStack);
+    //console.log("Starting 'CreateAllGameTile()", {numberOfPlayers, isAdvancedMode});
+    let topStack = GetStartingTiles();
     topStack = ShuffleStack(topStack);
-    console.log("Top Stack Shuffled", topStack);
+
     let bottomStack = GetRemainingTileStack(topStack);
-    console.log("Bottom Stack Created", bottomStack);
     bottomStack = ShuffleStack(bottomStack);
-    console.log("Bottom Stack Shuffled", bottomStack);
 
     gameTiles = topStack;
     gameTiles.push(...bottomStack);
 }
 
+/**
+ * Creates and returns the starting (top) tile stack
+ * @returns {Array<GameTile>}
+ */
 function GetStartingTiles(){
     let stack = []
     if(numberOfPlayers < 5){
@@ -278,6 +385,11 @@ function GetStartingTiles(){
     return stack;
 }
 
+/**
+ * Creates the main game stack (non-starting stack)
+ * @param {Array<GameTile>} previousStack All previously created Game Tiles in one stack
+ * @returns {Array<GameTile>}
+ */
 function GetRemainingTileStack(previousStack){
     let stack = [];
     
@@ -319,6 +431,9 @@ function GetRemainingTileStack(previousStack){
     return stack;
 }
 
+/**
+ * Disables all buttons related to drawing/discarding tiles from the game stack
+ */
 function HandleOutOfTiles(){
     document.getElementById("draw-btn").setAttribute("disabled", true);
     document.getElementById("discard-btn").setAttribute("disabled", true);
@@ -333,7 +448,11 @@ function HandleOutOfTiles(){
     meleeKeeperBtn.setAttribute("disabled", true);     
 }
 
-//Fisher-Yates shuffle compliments of Google search
+/**
+ * Fisher-Yates shuffle compliments of Google search
+ * @param {Array<GameTile>} stack The Game Tiles to shuffle
+ * @returns {Array<GameTile} The newly shuffled stack
+ */
 function ShuffleStack(stack){
     let currentIndex = stack.length;
     let randomIndex;
@@ -348,6 +467,17 @@ function ShuffleStack(stack){
     return stack;
 }
 
+/**
+ * Creates all copies of a single tile needed for the current stack and returns the stack with new tiles added
+ * @param {string} name Display Name for Tile
+ * @param {string} src  Image Name
+ * @param {string} wav  sound file name with extension
+ * @param {number} count Number of tiles to create
+ * @param {Array<GameTile>} stack The current stack where these new tiles will be added
+ * @param {Array<GameTile>} previousStack All other stacks that have previously been created (used to determine ID)
+ * @param {boolean} isMonster Whether the new tile is a monster
+ * @returns {Array<GameTile>} The new stack of tiles
+ */
 function CreateTileReferences(
     name, 
     src, 
@@ -367,6 +497,15 @@ function CreateTileReferences(
     return stack;
 }
 
+/**
+ * Creates and returns a single GameTile object intended to be used in the game stack
+ * @param {string} id Unique ID for the new Tile
+ * @param {string} name Display name for the tile
+ * @param {string} src  route to image
+ * @param {string} wav  sound file name
+ * @param {boolean} isMonster whether the tile is a monster
+ * @returns {GameTile}
+ */
 function CreateTileReference(id, name, src, wav, isMonster){
     return {
         "id": `${name}-${id}`,
@@ -377,6 +516,12 @@ function CreateTileReference(id, name, src, wav, isMonster){
     }
 }
 
+/**
+ * Manages a cache of sounds to be used in the game and returns the requested sound
+ * @param {string} wavName file name with extension
+ * @param {boolean} wasDiscardedAttack whether the sound should be a "surprise" attack
+ * @returns {Audio}
+ */
 function GetSound(wavName, wasDiscardedAttack){
     let wavSplit = wavName.split('.');
     let name = wavSplit[0];
@@ -395,6 +540,9 @@ function GetSound(wavName, wasDiscardedAttack){
     return soundCache[name];
 }
 
+/**
+ * Just plays the main game sound
+ */
 function StartGameLoopMusic(){
     let player = document.getElementById("game-music-player");
     player.play();
