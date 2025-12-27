@@ -224,7 +224,7 @@ function AddTileToPlayedStack(tile){
     let playedDiv = document.getElementById("played-div");
     let newImage = document.createElement("img");
     newImage.src = tile.src;
-    newImage.classList.add("img-fluid","pb-1");
+    newImage.classList.add("img-fluid", "rounded-5","pb-1");
     newImage.setAttribute("data-tile-id", tile.id);
     newImage.addEventListener("click", HandlePlayedOnClick);
     playedDiv.appendChild(newImage); 
@@ -237,7 +237,7 @@ function AddTileToDiscardedStack(tile){
     let discardedDiv = document.getElementById("discarded-div");
     let newImage = document.createElement("img");
     newImage.src = tile.src;
-    newImage.classList.add("img-fluid", "pb-1");
+    newImage.classList.add("img-fluid", "rounded-5", "pb-1");
     newImage.setAttribute("data-tile-id", tile.id);
     discardedDiv.appendChild(newImage);
     setTimeout(() => newImage.scrollIntoView(), 100);
