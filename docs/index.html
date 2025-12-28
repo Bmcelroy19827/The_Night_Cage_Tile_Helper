@@ -61,15 +61,15 @@
         <div class="d-flex flex-row">
             <div class="text-center">
                 <span class="text-danger h2" id="current-piece-description">Nick</span>
-                <div>
-                    <img class="rounded-5" id="current-piece" src=""/>
+                <div id="current-piece-container">
+                    <!-- <img class="rounded-5" id="current-piece" src=""/> -->
                 </div>
             </div>
-            <div class="text-center">
+            <!-- <div class="text-center">
                 <span class="text-danger ps-3 h2">Played</span>
                 <div id="played-div" class="d-flex flex-column-reverse ps-3 overflow-y-scroll">                          
                 </div>
-            </div>            
+            </div>             -->
             <div class="text-center">
                 <span class="text-danger ps-3 h2">Discard</span>
                 <div id="discarded-div" class="d-flex flex-column-reverse ps-3 overflow-y-scroll">                          
@@ -85,13 +85,13 @@
         >
             DRAW
         </button>
-        <button 
+        <!-- <button 
             class="btn btn-outline-primary m-1" 
             id="mark-placed-btn"
             onclick="HandleTilePlaced()"
         >
             Tile Placed
-        </button>
+        </button> -->
         <button 
             class="btn btn-outline-warning m-1" 
             id="discard-btn"
@@ -120,6 +120,9 @@
         >
             Keeper Melee Attack Discard
         </button>
+    </div>
+    <div id="game-board" class="container pt-3" aria-roledescription="Container for Game Board">
+
     </div>
     <script 
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" 

@@ -17,6 +17,7 @@
  * @prop {string} src
  * @prop {boolean} isMonster
  * @prop {string} wav
+ * @prop {HTMLImageElement | null} imgEle
  */
 
 /**
@@ -35,12 +36,12 @@ let discardedTiles = [];
 let playedTiles = [];
 
 /**
- * @type {GameTile}
+ * @type {GameTile | null}
  */
 let currentTile;
 
 /**
- * @type {number}
+ * @type {number | null}
  */
 let numberOfPlayers;
 
@@ -50,7 +51,7 @@ let numberOfPlayers;
 let isAdvancedMode;
 
 /**
- * @type {Record<string,Audio>}
+ * @type {Record<string,HTMLAudioElement>}
  */
 let soundCache = {};
 
@@ -64,8 +65,35 @@ let isGameRunning = false;
  */
 let emptyTileSoundFiles = ["laugh.mp3", "no.mp3", "no-no-no.mp3", "too-late.mp3", "wow.mp3"];
 
+/**
+ * @type {HTMLImageElement | null}
+ */
+let tileBeingDragged = null;
+
+/**
+ * @type {boolean}
+ */
+let tilePlacedOnBoard = false;
+
+/**
+ * @type {HTMLDivElement}
+ */
+const CURRENT_PIECE_CONTAINER = document.getElementById("current-piece-container");
+
+/**
+ * @type {HTMLImageElement}
+ */
+let emptyTileImage;
+
 SetInitialButtons();
+CreateEmptyTileImageElement();
 SetEmptyTile();
+
+function CreateEmptyTileImageElement(){
+    emptyTileImage = document.createElement("img");
+    emptyTileImage.src = "./assets/img/nick_cage.jpg";
+    emptyTileImage.classList.add("rounded-5", "current-piece");  
+}
 
 /**
  * Disables all buttons except "Start Game" - advanced monster buttons also hidden
@@ -74,7 +102,6 @@ function SetInitialButtons(){
     document.getElementById("create-game-btn").removeAttribute("disabled");
     document.getElementById("end-game-btn").setAttribute("disabled", true);
     document.getElementById("draw-btn").setAttribute("disabled", true);
-    document.getElementById("mark-placed-btn").setAttribute("disabled", true);
     document.getElementById("discard-btn").setAttribute("disabled", true);
     document.getElementById("wax-eater-attack-btn").setAttribute("disabled", true);
 
@@ -95,7 +122,6 @@ function StartGame(){
     document.getElementById("create-game-btn").setAttribute("disabled", true);
     document.getElementById("end-game-btn").removeAttribute("disabled");
     document.getElementById("draw-btn").removeAttribute("disabled");
-    document.getElementById("mark-placed-btn").removeAttribute("disabled");
     document.getElementById("discard-btn").removeAttribute("disabled");
     document.getElementById("wax-eater-attack-btn").removeAttribute("disabled");
     
@@ -115,6 +141,7 @@ function StartGame(){
     }
 
     CreateAllGameTiles();
+    CreateGameBoard();
     GetSound("put-the-bunny-back-in-the-box.mp3", false).play();
     isGameRunning = true;
     setTimeout( () => {
@@ -139,6 +166,7 @@ function EndGame(){
     let playedDiv = document.getElementById("played-div");
     playedDiv.textContent = '';
 
+    ClearGameBoard();
     GetSound("admiring_your_cage.mp3", false).play();
     SetEmptyTile();
     SetInitialButtons();
@@ -153,11 +181,11 @@ function EndGame(){
  * @returns {void}
  */
 function DrawTile(){
+    if(currentTile){
+        alert("Play the current tile before drawing more");
+        return;
+    }
     if(gameTiles.length > 0){
-        if(currentTile){
-            AddTileToPlayedStack(currentTile);
-            currentTile = null;
-        }
         let newTile = gameTiles.shift();
         console.log(`Drew ${newTile.name}`);
         SetCurrentTile(newTile);
@@ -181,13 +209,14 @@ function HandleDiscardTile(){
  * @returns {void}
  */
 function DiscardTile(isAttackPossible){
-    if(gameTiles.length > 0){
+    if(currentTile){
+        alert("Play the current tile before discarding more");
+        return;
+    }    
+    if(gameTiles.length > 0){  
         let tileToDiscard = gameTiles.shift();
         
         if(isAttackPossible == true && tileToDiscard.isMonster == true){
-            if(currentTile){
-                AddTileToPlayedStack(currentTile);
-            }
             console.log(`Attempt to discard a ${tileToDiscard.name}, but triggered attack`);
             tileToDiscard
             SetCurrentTile(tileToDiscard, true);
@@ -213,29 +242,40 @@ function DiscardTile(isAttackPossible){
  */
 function SetCurrentTile(newTile, wasDiscardedAttack = false){
     if(currentTile){
-        AddTileToPlayedStack(currentTile);
+        alert("Play the current tile - this shouldn't happen");
+        return;
     }
     
     currentTile = newTile;
-    let imgEle = document.getElementById("current-piece");
-    let pieceNameSpan = document.getElementById("current-piece-description");
 
-    imgEle.src = currentTile.src;
+    currentTile = SetTileImageElement(currentTile);
+
+    currentTile.imgEle.classList.add("current-piece", "rounded-5");
+    currentTile.imgEle.addEventListener("dragstart", () => CurrentPieceDragStart(newTile));
+    currentTile.imgEle.addEventListener("dragend", (e) => CurrentPieceDragStop(e, newTile));
+
+    CURRENT_PIECE_CONTAINER.appendChild(currentTile.imgEle);
+    CURRENT_PIECE_CONTAINER.removeChild(emptyTileImage);
+
+    let pieceNameSpan = document.getElementById("current-piece-description");
     pieceNameSpan.textContent = currentTile.name;
+
     GetSound(currentTile.wav, wasDiscardedAttack).play();
-    document.getElementById("mark-placed-btn").removeAttribute("disabled");
 }
 
 /**
  * Puts the default image when no tile selected and calls 'PlayEmptyTileSound'
  */
 function SetEmptyTile(){
-    currentTile = null;
-    document.getElementById("mark-placed-btn").setAttribute("disabled", true);
-    let imgEle = document.getElementById("current-piece");
+    //currentTile = null;
+
+    CURRENT_PIECE_CONTAINER.textContent = '';
+    CURRENT_PIECE_CONTAINER.appendChild(emptyTileImage);
+
+    //let imgEle = document.getElementById("current-piece");
+    //imgEle.src = "./assets/img/nick_cage.jpg";
+
     let pieceNameSpan = document.getElementById("current-piece-description");   
-    
-    imgEle.src = "./assets/img/nick_cage.jpg";
     pieceNameSpan.textContent = "Nick";
     PlayEmptyTileSound();
 }
@@ -284,33 +324,19 @@ function HandleWaxEaterAttack(){
 }
 
 /**
- * Moves tile to played stack and sets current piece to empty
- */
-function HandleTilePlaced(){
-    AddTileToPlayedStack(currentTile);  
-    SetEmptyTile();
-}
-
-/**
  * Allows player to click on an image in the played stack to move it to the discard stack
  * @param {Event} e 
  */
-function HandlePlayedOnClick(e){
+function HandlePlayedOnClick(e, tile){
     let img = e.target;
-    let tileId = img.dataset.tileId;
-    let foundTile = playedTiles.find(t => t.id == tileId);
 
-    if(confirm(`Move ${foundTile.name} to the discard pile?`)){
-        let playedDiv = document.getElementById("played-div");
-        playedDiv.removeChild(img);
+    if(confirm(`Move ${tile.name} to the discard pile?`)){
         img.removeEventListener("click", HandlePlayedOnClick);
-        let discardedDiv = document.getElementById("discarded-div");
-        discardedDiv.appendChild(img);
     
-        let foundIndex = playedTiles.findIndex(t => t.id == tileId);
+        let foundIndex = playedTiles.findIndex(t => t == tile);
         playedTiles.splice(foundIndex, 1);
-        discardedTiles.unshift(foundTile);
-        setTimeout(() => img.scrollIntoView(), 100);
+
+        AddTileToDiscardedStack(tile);
     }
 }
 
@@ -319,16 +345,12 @@ function HandlePlayedOnClick(e){
  * @param {GameTile} tile piece to be moved
  */
 function AddTileToPlayedStack(tile){
-    playedTiles.unshift(currentTile);
-    let playedDiv = document.getElementById("played-div");
-    let newImage = document.createElement("img");
-    newImage.src = tile.src;
-    newImage.classList.add("img-fluid", "rounded-5","pb-1");
-    newImage.setAttribute("data-tile-id", tile.id);
-    newImage.addEventListener("click", HandlePlayedOnClick);
-    playedDiv.appendChild(newImage); 
-    setTimeout(() => newImage.scrollIntoView(), 100);
-    console.log(`${currentTile.name} played`);
+    if(tile == currentTile){
+        playedTiles.unshift(currentTile);
+        currentTile = null;
+        console.log(`${tile.name} played`);
+        tile.imgEle.addEventListener("click", (e) => HandlePlayedOnClick(e, tile));
+    }
 }
 
 /**
@@ -338,12 +360,14 @@ function AddTileToPlayedStack(tile){
 function AddTileToDiscardedStack(tile){
     discardedTiles.unshift(tile);  
     let discardedDiv = document.getElementById("discarded-div");
-    let newImage = document.createElement("img");
-    newImage.src = tile.src;
-    newImage.classList.add("img-fluid", "rounded-5", "pb-1");
-    newImage.setAttribute("data-tile-id", tile.id);
-    discardedDiv.appendChild(newImage);
-    setTimeout(() => newImage.scrollIntoView(), 100);
+    
+    tile = SetTileImageElement(tile);
+
+    tile.imgEle.classList.add("img-fluid", "rounded-5", "pb-1");
+    tile.imgEle.removeEventListener("click", HandlePlayedOnClick);
+
+    discardedDiv.appendChild(tile.imgEle);
+    setTimeout(() => tile.imgEle.scrollIntoView(), 100);
     console.log(`${tile.name} discarded`);
 }
 
@@ -373,7 +397,7 @@ function GetStartingTiles(){
         stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 2, stack);
         stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 2, stack);
 
-        stack.forEach(tile => console.log(tile.id));
+        //stack.forEach(tile => console.log(tile.id));
         return stack
     }
 
@@ -381,9 +405,28 @@ function GetStartingTiles(){
     stack = CreateTileReferences("Crossroads", "./assets/img/Crossroads2_cropped.png", "safe_tile_draw.wav", 3, stack);
     stack = CreateTileReferences("Straight", "./assets/img/Straight3_cropped.png", "crumble_tile.wav", 2, stack);
     
-    stack.forEach(tile => console.log(tile.id));
+    //stack.forEach(tile => console.log(tile.id));
     return stack;
 }
+
+/**
+ * Creates Image Element and attaches to tile
+ * @param {GameTile} tile
+ * @returns {GameTile} 
+ */
+function SetTileImageElement(tile){
+    if(!tile.imgEle){
+        tile.imgEle = document.createElement("img");
+        tile.imgEle.src = tile.src;
+        tile.imgEle.setAttribute("data-tile-id", tile.id);
+        console.log(`New image element created for ${tile.id}`, tile.imgEle);
+    }
+    
+    tile.imgEle.classList.remove("current-piece", "img-full");
+    
+    return tile;
+}
+
 
 /**
  * Creates the main game stack (non-starting stack)
@@ -546,4 +589,131 @@ function GetSound(wavName, wasDiscardedAttack){
 function StartGameLoopMusic(){
     let player = document.getElementById("game-music-player");
     player.play();
+}
+
+/**
+ * Create Four Player Game Board
+ */
+function CreateGameBoard(){
+    let gameSpaces = 36;
+    let gameBoard = document.getElementById("game-board");
+    gameBoard.classList.remove("five-player-board", "four-player-board");
+    if(numberOfPlayers < 5){
+        gameBoard.classList.add("four-player-board");
+    }
+    else{
+        gameBoard.classList.add("five-player-board");
+        gameSpaces = 49;
+    }
+
+    for(let i = 0; i < gameSpaces; i++){
+        gameBoard.appendChild(GetGameBoardSpace());
+    }
+}
+
+/**
+ * Create One GameBoard Tile with image child and event listeners setup
+ * @returns {HTMLDivElement}
+ */
+function GetGameBoardSpace(){
+    let div = document.createElement("div");
+    div.classList.add("board-space");
+    let img = document.createElement("img");
+    img.src = "./assets/img/board_space.png";
+    img.classList.add("img-full");
+    div.appendChild(img);    
+    
+    div.addEventListener("dragover", BoardSpaceDragOver);
+    div.addEventListener("drop", BoardSpaceDrop);
+    div.addEventListener("dragenter", BoardSpaceDragEnter);
+    div.addEventListener("dragleave", BoardSpaceDragLeave);
+
+    return div;
+}
+
+/**
+ * Marks current piece being dragged
+ * @param {Event} e 
+ * @param {GameTile} tile
+ */
+function CurrentPieceDragStart(tile){
+    console.log("Drag Start", {"Tile": tile});
+    tileBeingDragged = tile;
+    //SetEmptyTile();
+}
+
+/**
+ * 
+ * @param {DragEvent} e 
+ * @param {GameTile} tile 
+ * @returns 
+ */
+function CurrentPieceDragStop(e, tile){
+    console.log("Drag Stop", {"Event": e, "Tile": tile});
+    if(tilePlacedOnBoard == true){
+        SetEmptyTile();
+        console.log("Piece was placed on game board", e.target);
+        AddTileToPlayedStack(tile);
+        tilePlacedOnBoard = false;
+
+        return;
+    }
+
+    console.log("Piece not placed on game board", e.target);
+    CURRENT_PIECE_CONTAINER.append(e.target);
+    //CURRENT_PIECE_CONTAINER.removeChild(emptyTileImage);
+}
+
+/**
+ * Keep Drag Over event from blocking append
+ * @param {Event} e 
+ */
+function BoardSpaceDragOver(e){
+    e.preventDefault();
+}
+
+/**
+ * Place Tile in Board Space
+ * @param {Event} e
+ */
+function BoardSpaceDrop(e){
+    console.log({"dragged": tileBeingDragged, "draggedNotNull": tileBeingDragged != null, "currentNotNull": currentTile != null, "current": currentTile, "same": tileBeingDragged === currentTile})
+    if(tileBeingDragged != null && currentTile != null && tileBeingDragged === currentTile){
+        tilePlacedOnBoard = true;
+        tileBeingDragged.imgEle.classList.remove("current-piece", "rounded-5");
+        tileBeingDragged.imgEle.classList.add("img-full")
+        e.target.closest(".board-space").append(tileBeingDragged.imgEle);
+        e.target.setAttribute("hidden", "true");
+        tileBeingDragged.imgEle.removeEventListener("dragstart", () => CurrentPieceDragStart(tileBeingDragged));
+        tileBeingDragged.imgEle.removeEventListener("dragend", (e) => CurrentPieceDragStop(e, tileBeingDragged));
+        AddTileToPlayedStack(tileBeingDragged);
+        tileBeingDragged = null;
+    }
+    e.target.classList.remove("highlight");
+}
+
+/**
+ * Adds class to board space to visually indicate the space has been entered
+ * @param {Event} e 
+ */
+function BoardSpaceDragEnter(e){
+    if(tileBeingDragged){
+        e.target.classList.add("highlight");
+    }
+}
+
+/**
+ * Removes the class that indicates the space was entered
+ * @param {Event} e 
+ */
+function BoardSpaceDragLeave(e){
+    e.target.classList.remove("highlight");
+}
+
+/**
+ * Clear Game Board
+ */
+function ClearGameBoard(){
+    let gameBoard = document.getElementById("game-board");
+    gameBoard.textContent = '';
 }
